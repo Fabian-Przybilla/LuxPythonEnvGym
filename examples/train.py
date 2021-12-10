@@ -43,9 +43,9 @@ def get_command_line_arguments():
     parser.add_argument('--learning_rate', help='Learning rate', type=float, default=0.001)
     parser.add_argument('--gamma', help='Gamma', type=float, default=0.995)
     parser.add_argument('--gae_lambda', help='GAE Lambda', type=float, default=0.95)
-    parser.add_argument('--batch_size', help='batch_size', type=int, default=2048)  # 64
-    parser.add_argument('--step_count', help='Total number of steps to train', type=int, default=10000000)
-    parser.add_argument('--n_steps', help='Number of experiences to gather before each learning period', type=int, default=2048)
+    parser.add_argument('--batch_size', help='batch_size', type=int, default=64)  # 64
+    parser.add_argument('--step_count', help='Total number of steps to train', type=int, default=500000)
+    parser.add_argument('--n_steps', help='Number of experiences to gather before each learning period', type=int, default=64)
     parser.add_argument('--path', help='Path to a checkpoint to load to resume training', type=str, default=None)
     parser.add_argument('--n_envs', help='Number of parallel environments to use in training', type=int, default=1)
     args = parser.parse_args()
@@ -91,7 +91,6 @@ def train(args):
         # Update the learning rate
         model.lr_schedule = get_schedule_fn(args.learning_rate)
 
-        # TODO: Update other training parameters
     else:
         model = PPO("MlpPolicy",
                     env,
@@ -104,8 +103,6 @@ def train(args):
                     n_steps=args.n_steps
                     )
 
-    
-    
     callbacks = []
 
     # Save a checkpoint and 5 match replay files every 100K steps
@@ -152,17 +149,8 @@ def train(args):
     saves = glob.glob(f'models/rl_model_{run_id}_*_steps.zip')
     latest_save = sorted(saves, key=lambda x: int(x.split('_')[-2]), reverse=True)[0]
     model.load(path=latest_save)
-    obs = env.reset()
-    for i in range(600):
-        action_code, _states = model.predict(obs, deterministic=True)
-        obs, rewards, done, info = env.step(action_code)
-        if i % 5 == 0:
-            print("Turn %i" % i)
-            env.render()
+    env.reset()
 
-        if done:
-            print("Episode done, resetting.")
-            obs = env.reset()
     print("Done")
 
     '''

@@ -138,3 +138,6 @@ dmypy.json
 .pyre/
 
 .idea/
+/kaggle_submissions2/
+/logs_*
+/kaggle_submissions/agent_policy.py
